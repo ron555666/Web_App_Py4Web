@@ -1,0 +1,117 @@
+[[extend 'layout.html']]
+
+<style>
+[v-cloak] {
+     display: none;
+}
+</style>
+
+
+<div class="section" id="vue-target" v-cloak>
+  <!-- Put here your Vue.js template -->
+
+  <div class="columns">
+    <div class="column us is-two-third">
+
+        <div class="field">
+         <textarea class="textarea" placeholder="What's on your mind?" rows="2" v-model="textBox"></textarea>
+       </div>
+       <div class="field">
+         <div class="control"><button class="button is-link" @click="publish">Publish!</button></div>
+       </div>
+
+        <div class="box" v-for="meow in meows" :key="meow.id">
+         <nav class="level is-mobile">
+           <div class="level-left">
+             <a class="level-item" aria-label="reply">
+               <span class="icon is-small">
+                 <i class="fa fa-user"></i>
+               </span>
+               <span class="ml-2">{{meow.author_name}}</span>
+             </a>
+           </div>
+           <div class="level-right">
+             <span class="level-item">
+               {{ formatTimestamp(meow.timestamp) }}
+             </span>
+           </div>
+         </nav>
+         <div class="content">
+           {{ meow.content }}
+         </div>
+         <nav class="level is-mobile">
+           <div class="level-left">
+             <a class="level-item" aria-label="reply">
+               <span class="icon is-small">
+                 <i class="fa fa-reply" aria-hidden="true"></i>
+               </span>
+               <span class="ml-1"></span>
+             </a>
+             <a class="level-item" aria-label="retweet">
+               <span class="icon is-small">
+                 <i class="fa fa-retweet" aria-hidden="true"></i>
+               </span>
+             </a>
+           </div>
+         </nav>
+       </div>
+    </div>
+
+    <div class="column is-one-third has-background-light">
+
+      <div class="field">
+        <div class="control" >
+          <button class="button">
+            <span>Recent Meows</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="field">
+        <p class="control has-icons-right">
+          <input class="input" type="text" placeholder="Search users" v-model="searchContent" @keyup="search">
+          <span class="icon is-small is-right" style="pointer-events: auto;" @click="reload">
+            <i class="fa fa-times-circle"></i>
+          </span>
+        </p>
+      </div>
+
+    <div v-for="user in users" :key="user.id" v-if="searchContent === ''
+        || user.username.includes(searchContent)" class="field has-addons">
+        <p class="control">
+            <button class="button">
+                <span>{{ user.username }}</span>
+            </button>
+        </p>
+        <p class="control">
+            <button class="button is-success is-outlined" @click="to_follow(user.id)" v-if="!user.got_followed_status">
+                <span class="icon"><i class="fa fa-check"></i></span>
+                <span>Follow</span>
+            </button>
+            <button class="button is-danger is-outlined" @click="unfollow(user.id)" v-else>
+                <span class="icon"><i class="fa fa-times"></i></span>
+                <span>Unfollow</span>
+            </button>
+        </p>
+    </div>
+
+    </div>
+  </div>
+
+</div>
+
+
+[[block page_scripts]]
+<!-- Loads the index-specific js for Vue -->
+<script>
+  let get_users_url = "[[=XML(get_users_url)]]";
+  let follow_url = "[[=XML(follow_url)]]";
+  let unfollow_url = "[[=XML(unfollow_url)]]";
+
+  let search_url = "[[=XML(search_url)]]";
+  let publish_url = "[[=XML(publish_url)]]";
+  let get_meows_url = "[[=XML(get_meows_url)]]";
+
+</script>
+<script src="js/index.js"></script>
+[[end]]
