@@ -1,0 +1,191 @@
+[[extend 'layout.html']]
+
+<style>
+  [v-cloak] {
+    display: none;
+  }
+
+  .box {
+    position: relative;
+    z-index: 2;
+    width: 100%;
+    background-color: transparent;
+    border: none;
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.95), 0 0 20px rgba(255, 255, 255, 0.96), 0 0 30px rgba(255, 255, 255, 0.74), 0 0 40px rgba(163, 227, 238, 0.82);
+  }
+
+  .pastel-red {
+    background-color: rgba(255, 209, 220, 0.7);
+  }
+
+  .pastel-blue {
+    background-color: rgba(194, 224, 244, 0.7);
+  }
+
+  .pastel-yellow {
+    background-color: rgba(255, 255, 179, 0.7);
+  }
+
+  .box.no-color {
+    background-color: rgba(255, 255, 254, 0.7);
+  }
+
+body {
+  overflow: hidden;
+  position: relative;
+  background:
+    radial-gradient(
+      circle at top left,
+      #ffd4db 0%,
+      #c2e0f4 20%,
+      #ffffb3 40%,
+      #e8d4f9 60%,
+      #a2b5ff 80%,
+      #b3e2ff 85%,
+      #dcf3ad 90%,
+      #cc967e 100%
+    ) no-repeat 0% 50% / 100% 200%;
+  animation: gradientAnimation 20s ease-in-out infinite;
+}
+
+@keyframes gradientAnimation {
+  0%, 100% {
+    background-position: 0% 0%;
+  }
+  50% {
+    background-position: 0% 100%;
+  }
+}
+
+@keyframes glow {
+  0%, 100% {
+    text-shadow: 0 0 10px #96ffef, 0 0 20px #b0fdca, 0 0 30px #eeffd0, 0 0 40px #cee6ff;
+  }
+}
+
+</style>
+
+<div class="section" id="vue-target" v-cloak>
+  <div class="has-text-left" style="padding-top: 30px; padding-bottom: 30px;">
+    <h1 class="title is-1" style="color: rgba(41,173,139,0.76); text-shadow: 2px 2px 2px #000000; font-family: 'Impact'; animation: glow 5s ease-in-out infinite; font-size: 75px;">
+      Favorite Images
+    </h1>
+  </div>
+    <div class="columns">
+    <div class="column is-right mt-5">
+    <a href="[[=URL('index')]]" class="button is-primary is-light is-pulled-right">
+      <i class="fa fa-home fa-fw"></i> Back to Homepage
+    </a>
+    </div>
+  </div>
+    <div class="columns is-multiline">
+        <div class="column is-4" v-for="r in rows" :key="r._idx" :ref="'contact-' + r._idx" v-if="r.mark">
+            <div class="box is-mobile" :class="r.color" style="width: 100%;">
+        <div class="content has-text-left">
+          <div class="field is-horizontal">
+            <div class="field-label is-normal">
+              <label class="label is-size-5">Author:</label>
+            </div>
+            <div class="field-body">
+              <div class="field">
+                <div class="control">
+                  <input type="text" class="input" v-model="r.first_name"
+                         readonly
+                         style="background: transparent; border: none; outline: none;"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="field is-horizontal">
+            <div class="field-label is-normal">
+              <label class="label is-size-5">Title:</label>
+            </div>
+            <div class="field-body">
+              <div class="field">
+                <div class="control" :class="{'is-loading': r._state.title === 'pending'}">
+                  <input type="text" class="input" v-model="r.title"
+                         :class="{
+                            'is-focused': r._state.title === 'edit',
+                            'is-static': r._state.title === 'clean',
+                         }"
+                         :readonly="r._state.title === 'clean'"
+                         @click="start_edit(r._idx, 'title')"
+                         @blur="stop_edit(r._idx, 'title')"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="content has-text-centered">
+            <div v-if="!r.thumbnail">
+              <p class="control">
+                <div class="file is-info is-centered">
+                  <label class="file-label">
+                    <input class="file-input" type="file"
+                           accept=".jpg, .png, .jpeg, .gif, .bmp, .tif, .tiff|image/*"
+                           @change="upload_file($event, r._idx)">
+                    <span class="file-cta">
+                      <span class="file-label">
+                        <span><i class="fa fa-upload"></i></span>
+                      </span>
+                    </span>
+                  </label>
+                </div>
+              </p>
+            </div>
+            <img v-else-if="r.thumbnail" width="600" :src="r.thumbnail"/>
+          </div>
+          <div class="field is-horizontal">
+            <div class="field-label is-normal">
+              <label class="label is-size-6">Caption:</label>
+            </div>
+            <div class="field-body">
+              <div class="field">
+                <div class="control" :class="{'is-loading': r._state.caption === 'pending'}">
+                  <input type="text" class="input" v-model="r.caption"
+                         :class="{
+                            'is-focused': r._state.caption === 'edit',
+                            'is-static': r._state.caption === 'clean',
+                         }"
+                         :readonly="r._state.caption === 'clean'"
+                         @click="start_edit(r._idx, 'caption')"
+                         @blur="stop_edit(r._idx, 'caption')"
+                         placeholder="Please provide a caption"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="is-mobile">
+          <button @click="markContact(r._idx)" class="button is-small is-marked" style="background-color: transparent; border: none;">
+            <i v-if="r.mark" class="fa fa-heart fa-2x" style="color: #84e1b8;"></i>
+            <i v-else class="fa fa-heart-o fa-2x" style="color: #84e1b8;"></i>
+          </button>
+        </div>
+        <div class="delete-button" style="text-align: right;">
+          <button @click="delete_contact(r._idx)" class="button is-danger is-outlined is-small">
+            <i class="fa fa-trash"></i>
+          </button>
+        </div>
+      </div>
+        </div>
+    </div>
+</div>
+
+[[block page_scripts]]
+<!-- Loads the index-specific js for Vue -->
+<script>
+  let get_users_url = "[[=XML(get_users_url)]]";
+  let follow_url = "[[=XML(follow_url)]]";
+  let load_contacts_url = "[[=XML(load_contacts_url)]]";
+  let add_contact_url = "[[=XML(add_contact_url)]]";
+  let delete_contact_url = "[[=XML(delete_contact_url)]]";
+  let edit_contact_url = "[[=XML(edit_contact_url)]]";
+  let upload_thumbnail_url = "[[=XML(upload_thumbnail_url)]]";
+  let set_add_status_url = "[[=XML(set_add_status_url)]]";
+  let mark_contact_url = "[[=XML(mark_contact_url)]]";
+</script>
+<script src="js/index.js"></script>
+[[end]]
