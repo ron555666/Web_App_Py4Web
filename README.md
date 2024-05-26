@@ -1,1 +1,1 @@
-PostEdit, Back-End:Py4Web, Front-End:Vue.js
+PostEditApp, Back-End: Py4Web, Front-End:Vue.js
